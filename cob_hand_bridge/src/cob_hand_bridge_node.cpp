@@ -107,6 +107,7 @@ bool initCallback(std_srvs::Trigger::Request  &req, std_srvs::Trigger::Response 
     }else{
         res.success = true;
         res.message = "already initialized";
+        g_as->start();
     }
 
     return true;
