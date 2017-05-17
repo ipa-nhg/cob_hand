@@ -41,6 +41,7 @@ ros::Timer g_command_timer;
 ros::Timer g_deadline_timer;
 double g_stopped_velocity;
 double g_stopped_current;
+bool g_initialized;
 bool g_motion_stopped;
 bool g_control_stopped;
 bool g_motors_moved;
@@ -88,7 +89,7 @@ bool initCallback(std_srvs::Trigger::Request  &req, std_srvs::Trigger::Response 
     
     if(!g_status) {
         res.message = "hand is not yet connected";
-    }else if(g_status->status == g_status->NOT_INITIALIZED) {
+    }else if(g_status->status == g_status->NOT_INITIALIZED && !g_initialized) {
         lock.unlock();
         cob_hand_bridge::InitFinger srv;
         srv.request.port = nh_priv.param<std::string>("sdhx/port", "/dev/ttyACM0");
@@ -104,6 +105,8 @@ bool initCallback(std_srvs::Trigger::Request  &req, std_srvs::Trigger::Response 
         }else{
             res.message = "init_finger service does not exist";
         }
+        lock.lock();
+        g_initialized = res.success;
     }else{
         res.success = true;
         res.message = "already initialized";
