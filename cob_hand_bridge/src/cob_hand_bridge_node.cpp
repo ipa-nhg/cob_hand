@@ -89,7 +89,7 @@ bool initCallback(std_srvs::Trigger::Request  &req, std_srvs::Trigger::Response 
     
     if(!g_status) {
         res.message = "hand is not yet connected";
-    }else if(g_status->status == g_status->NOT_INITIALIZED || !g_initialized) {
+    }else if(g_status->status == g_status->NOT_INITIALIZED) {
         lock.unlock();
         cob_hand_bridge::InitFinger srv;
         srv.request.port = nh_priv.param<std::string>("sdhx/port", "/dev/ttyACM0");
@@ -107,6 +107,11 @@ bool initCallback(std_srvs::Trigger::Request  &req, std_srvs::Trigger::Response 
         }
         lock.lock();
         g_initialized = res.success;
+    }else if(!g_initialized){
+        g_as->start();
+        res.success = true;
+        res.message = "finger already initialized, restarting the controller";
+        g_initialized = true;
     }else{
         res.success = true;
         res.message = "already initialized";
